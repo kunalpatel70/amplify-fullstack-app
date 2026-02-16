@@ -14,6 +14,7 @@ const client = generateClient<Schema>();
 
 export default function App() {
   const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
+  const [todoContent, setTodoContent] = useState("");
 
   function listTodos() {
     client.models.Todo.observeQuery().subscribe({
@@ -26,9 +27,10 @@ export default function App() {
   }, []);
 
   function createTodo() {
-    client.models.Todo.create({
-      content: window.prompt("Todo content"),
-    });
+    if (todoContent.trim()) {
+      client.models.Todo.create({ content: todoContent });
+      setTodoContent("");
+    }
   }
 
   function deleteTodo(id: string) {
@@ -38,7 +40,16 @@ export default function App() {
   return (
     <main>
       <h1>My todos</h1>
-      <button onClick={createTodo}>+ new</button>
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+        <input
+          type="text"
+          value={todoContent}
+          onChange={(e) => setTodoContent(e.target.value)}
+          placeholder="E.g Buy eggs"
+          style={{ flex: 1, padding: '8px' }}
+        />
+        <button onClick={createTodo}>+ new</button>
+      </div>
       <ul>
         {todos.map((todo) => (
           <li onClick={() => deleteTodo(todo.id)} key={todo.id}>{todo.content}</li>
